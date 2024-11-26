@@ -40,12 +40,19 @@ def read_file_contents(file_path):
 def main():
     # Hardcode the important files to include
     important_files = [
-        '.gitignore',          # Git ignore rules
-        'pyproject.toml',      # Poetry configuration
-        'README.md',           # Project documentation
-        'app.py',             # Main Streamlit application
-        'requirements.txt'     # Dependencies (if not using poetry)
+        '.gitignore',        # Git ignore rules
+        'pyproject.toml',    # Poetry configuration
+        'README.md',         # Project documentation
+        'app.py',           # Main Streamlit application
+        'requirements.txt'   # Dependencies (if not using poetry)
     ]
+    
+    # Add all files from pages directory if it exists
+    pages_dir = 'pages'
+    if os.path.exists(pages_dir):
+        for file in os.listdir(pages_dir):
+            if file.endswith('.py'):
+                important_files.append(os.path.join(pages_dir, file))
     
     # Project directory (current directory by default)
     project_dir = '.'
