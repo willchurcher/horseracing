@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-from utils.navigation import add_navigation
 
 st.set_page_config(page_title="Literature Review - Horse Racing Analytics", page_icon="📚", layout="wide")
 # Define your citations as a list of dictionaries
