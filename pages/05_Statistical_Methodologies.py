@@ -70,6 +70,50 @@ def plot_uncertainty_effect(sigma):
     plt.tight_layout()
     return fig
 
+# Add these functions to the top of your file
+
+def compute_hat_matrix(X, p):
+    """
+    Compute the hat matrix for logistic regression
+    
+    Parameters:
+    X: design matrix (n x p)
+    p: vector of probabilities
+    
+    Returns:
+    H: hat matrix (n x n)
+    """
+    # Create diagonal matrix of sqrt(p(1-p))
+    L_inv = np.diag(1 / np.sqrt(p * (1-p)))
+    
+    # Compute A = XL^(-1)
+    A = X @ L_inv
+    
+    # Compute hat matrix
+    H = A @ np.linalg.inv(A.T @ A) @ A.T
+    
+    return H
+
+def compute_prediction_variance(x_new, X, p):
+    """
+    Compute variance for new prediction
+    
+    Parameters:
+    x_new: new observation (p,)
+    X: design matrix (n x p)
+    p: vector of probabilities
+    
+    Returns:
+    variance: scalar
+    """
+    L_inv = np.diag(1 / np.sqrt(p * (1-p)))
+    a_new = x_new @ L_inv
+    A = X @ L_inv
+    
+    # Compute variance using hat matrix formulation
+    variance = a_new @ np.linalg.inv(A.T @ A) @ a_new.T
+    
+    return variance
 # Main Streamlit app
 st.title("Kelly Criterion Analysis")
 
@@ -150,6 +194,14 @@ I(\beta) = X^T\Lambda X
 $$
 
 with $\Lambda$ diagonal and $\Lambda_{ii} = p_i(1-p_i)$.
+
+For an out of sample observation x:
+
+$$
+\log\frac{P}{1-P} = x^T \hat \beta ~ \sim N \left (x^T\beta,x^T(X^T\Lambda X)^{-1}x \right)
+$$
+
+As a result, the distribution of the probability is itself
 
 This leads to uncertainty in our probability estimates:
 
