@@ -246,7 +246,7 @@ Suppose now you are betting in a pool where the house takes $R\cdot 100\%$ of th
 - The amount the market bets on horse $h$ is $M_h$. 
 - Horse $h$ winning is represented with a Bernoulli random variable $X_h$.
 
-Each of these quantities will be modelled. What is the distribution of the expected 
+Each of these quantities will be modelled. Consider the distribution of wealth after one bet.
 
 $$
 W_n = W_{n-1} - \sum_h B_h + \sum_h B_h\cdot (1-R)\cdot \frac{\sum_j B_j+M_j}{B_h+M_h}\cdot X_h
