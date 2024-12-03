@@ -58,7 +58,7 @@ def plot_uncertainty_effect(sigma):
     expected_p = [calculate_expected_p(p, sigma) for p in p_values]
     ax.plot(p_values, expected_p, '-', label=f'σ = {sigma:.1f}')
     
-    ax.set_xlabel('True probability (p)', fontsize=12)
+    ax.set_xlabel('Original probability (p)', fontsize=12)
     ax.set_ylabel('Expected probability E[P]', fontsize=12)
     ax.set_title('Effect of Uncertainty on Expected Probability', fontsize=14)
     ax.grid(True, alpha=0.3)
@@ -173,7 +173,7 @@ $$
 f^* = \frac{pd - 1}{d-1}
 $$
 
-## Uncertainty in Probability Estimates
+## Accounting for estimation uncertainty
 
 In practice, we estimate probabilities using logistic regression:
 
@@ -201,21 +201,23 @@ $$
 \log\frac{P}{1-P} = x^T \hat \beta ~ \sim N \left (x^T\beta,x^T(X^T\Lambda X)^{-1}x \right)
 $$
 
-As a result, the distribution of the probability is itself
+As a result, the distribution of the probability is itself random, which is effectively a Bayesian insight.
 
-This leads to uncertainty in our probability estimates:
+## Consequences of random probabilities
 
-$$
-\log \frac{P}{1-P} \sim N \left (\log \frac{p}{1-p},\sigma^2 \right )
-$$
-
-The Kelly fraction becomes:
-
+How does the derivation of the Kelly criterion change if $P$ is non-deterministic? If one follows the original argument, they will find all that changes in the result is the use
+of $\mathbb{E}[P]$ in place of $p$, giving the new Kelly fraction of:
 $$
 f^* = \frac{\mathbb{E}[P]d - 1}{d-1}
 $$
 
-The effect of this uncertainty is shown below:
+How does $\mathbb{E}[P]$ diverge from $p$ as variance increases? Let:
+$$
+\log \frac{P}{1-P} \sim N \left (\log \frac{p}{1-p},\sigma^2 \right )
+$$
+
+The chart below demonstrates the impact of increasing variance on expected probability.
+
 """)
 
 # Uncertainty effect plot
@@ -227,12 +229,63 @@ with right_col:
     st.pyplot(plot_uncertainty_effect(sigma))
 
 # Favorite-longshot bias explanation
-st.markdown("""
-### The Favorite-Longshot Bias
+st.markdown(r"""
+## The Favorite-Longshot Bias
 
 The uncertainty adjustment naturally counteracts the favorite-longshot bias:
-- Favorites (high probability events) have their expected probability reduced
-- Longshots (low probability events) have their expected probability increased
+- Favorites (high probability events) have their expected probability reduced.
+- Longshots (low probability events) have their expected probability increased.
 
-This matches empirical observations in betting markets, where favorites tend to be underpriced and longshots overpriced.
 """)
+
+
+
+st.markdown(r'''
+## The general setting
+Suppose now you are betting in a pool where the house takes $R\cdot 100\%$ of the winnings. Suppose:
+- The amount the market bets on horse $h$ is $M_h$. 
+- Horse $h$ winning is represented with a Bernoulli random variable $X_h$.
+
+Each of these quantities will be modelled. What is the distribution of the expected 
+
+$$
+W_n = W_{n-1} - \sum_h B_h + \sum_h B_h\cdot (1-R)\cdot \frac{\sum_j B_j+M_j}{B_h+M_h}\cdot X_h
+$$
+
+$$
+\log \frac{W_n}{W_{n-1}} = \log \left(1 + \sum_h \frac{B_h}{W_{n-1}} \cdot \left ((1-R)\cdot \frac{\sum_j B_j + M_j}{B_h+M_h}\cdot X_h -1 \right )\right) 
+$$
+
+By the logic of Kelly, we aim to maximise this growth rate in expectation:
+
+$$
+f(B_{1:H}) = \mathbb{E} \left [\log \left(1 + \sum_{h=1}^H \frac{B_h}{W_{n-1}} \cdot \left ((1-R)\cdot \frac{\sum_j B_j + M_j}{B_h+M_h}\cdot X_h -1 \right )\right) \right ]
+$$
+
+Assuming we can sample from this posterior distribution, then stochastic optimisation methods can be used to determine the optimal bet sizes $B_h$.
+
+### Conclusions
+
+- The market sizes $M_h$ and outcome indicators $X_h$ should be modelled jointly.
+- There is a natural relationship between $B_h$ and $W_{n-1}$ as well as between $B_h$ and $M_h$.
+    - Trading off these terms will lead to greater execution performance.
+
+## Further questions
+
+- Is Kelly truly what should be optimised?
+    - What about fractional Kelly?
+    - Or optimising some risk-adjusted Kelly?
+- So far we have accounted for parameter uncertainty in the model. 
+    - How would bias impact the bet sizing? 
+    - Or does accounting for a model's uncertainty handle this naturally?
+- How would the final objective be optimised in practice?
+    - Would penalisation and regularisation terms be of use?
+    - How would you ensure bets are non-negative?
+    - Would an Adam type stochastic optimiser work?
+    - Is the gradient of the function inside the expectation an unbiased estimator of the gradient of the objective function?
+        - In this case stochastic gradient descent would be useful.
+- What are the ties with reinforcement learning?
+    - Proximal Policy Optimisation feels appropriate somehow...
+- What models are suitable here?
+
+''')

@@ -14,6 +14,7 @@ st.markdown('''
 - If we built a model with no interaction how would this work?
 - What are the flaws? What could go wrong with assuming no interaction which would impact the distribution of the outcome?
 
-
+## Bet sizing
+- How do you account for a fraction of the pool to already being taken?
 
 ''')
