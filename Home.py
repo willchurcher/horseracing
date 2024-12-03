@@ -1,8 +1,6 @@
 import streamlit as st
 import datetime
 
-from utils.navigation import add_navigation
-
 # Configure the page
 st.set_page_config(
     page_title="Page Title - Horse Racing Analytics",
